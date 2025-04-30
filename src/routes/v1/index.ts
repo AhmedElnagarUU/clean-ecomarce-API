@@ -1,0 +1,33 @@
+import express from 'express';
+import adminRoutes from '../../modules/admin/admin.routes';
+import authRoutes from '../../modules/auth/auth.routes';
+import dashboardRoutes from '../../modules/dashboard/dashboard.routes';
+import productRoutes from '../../modules/product/product.routes';
+import orderRoutes from '../../modules/order/order.routes';
+import categoryRoutes from '../../modules/category/category.routes';
+import cleanupRoutes from '../../modules/cleanup/cleanup.routes';
+
+const router = express.Router();
+
+// Auth routes
+router.use('/auth', authRoutes);
+
+// Admin routes
+// router.use('/admins', adminRoutes);
+
+// Dashboard routes
+router.use('/dashboard', dashboardRoutes);
+
+// Product routes
+router.use('/products', productRoutes);
+
+// Order routes
+router.use('/orders', orderRoutes);
+
+// Category routes
+router.use('/categories', categoryRoutes);
+
+// Cleanup routes
+router.use('/cleanup', cleanupRoutes);
+
+export default router; 
