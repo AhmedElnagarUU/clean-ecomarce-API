@@ -1,18 +1,19 @@
 import { Request, Response } from 'express';
 import { Order } from './order.model';
+import { NotificationService } from '../notification/notification.service';
 
 export class OrderController {
   static async getOrders(req: Request, res: Response) {
     try {
       const orders = await Order.find()
-        .populate('customer', 'name email')
+        .populate('customer')
         .sort({ createdAt: -1 });
       return res.json({
         success: true,
         data: orders
       });
     } catch (error: any) {
-      return res.status(500).json({
+      return res.status(400).json({
         success: false,
         message: error.message
       });
@@ -21,10 +22,12 @@ export class OrderController {
 
   static async createOrder(req: Request, res: Response) {
     try {
-      console.log("create order");
-      console.log(req.body);
       const order = new Order(req.body);
       await order.save();
+
+      // Create notification for new order
+      await NotificationService.createOrderPlacedNotification(order);
+
       return res.status(201).json({
         success: true,
         data: order
@@ -39,11 +42,29 @@ export class OrderController {
 
   static async updateOrderStatus(req: Request, res: Response) {
     try {
-      const order = await Order.findByIdAndUpdate(
-        req.params.id,
-        { status: req.body.status },
-        { new: true }
+      const order = await Order.findById(req.params.id);
+      
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: 'Order not found'
+        });
+      }
+
+      const oldStatus = order.status;
+      const newStatus = req.body.status;
+
+      // Update order status
+      order.status = newStatus;
+      await order.save();
+
+      // Create notification for status change
+      await NotificationService.createOrderStatusChangeNotification(
+        order,
+        oldStatus,
+        newStatus
       );
+
       return res.json({
         success: true,
         data: order

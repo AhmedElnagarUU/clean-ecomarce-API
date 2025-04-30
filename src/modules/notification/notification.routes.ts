@@ -1,0 +1,19 @@
+import { Router } from 'express';
+import { NotificationController } from './notification.controller';
+import { authMiddleware } from '../../middleware/auth.middleware';
+
+const router = Router();
+
+// Get all notifications
+router.get('/', authMiddleware, NotificationController.getNotifications);
+
+// Mark a notification as read
+router.put('/:id/read', authMiddleware, NotificationController.markAsRead);
+
+// Mark all notifications as read
+router.put('/read-all', authMiddleware, NotificationController.markAllAsRead);
+
+// Get unread notifications count
+router.get('/unread/count', authMiddleware, NotificationController.getUnreadCount);
+
+export default router; 

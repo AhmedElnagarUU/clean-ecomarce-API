@@ -8,6 +8,7 @@ import v1Routes from './routes/v1';
 import logger from './config/logger';
 import { httpLogger } from './middleware/logging.middleware';
 import { startCleanupScheduler } from './utils/scheduler';
+import notificationRoutes from './modules/notification/notification.routes';
 
 import session from 'express-session';
 
@@ -56,6 +57,7 @@ app.use(passport.session()); // Add passport session support
 
 // API Routes
 app.use('/api/v1', v1Routes);
+app.use('/api/notifications', notificationRoutes);
 
 // Basic route
 app.get('/', (req: Request, res: Response) => {
