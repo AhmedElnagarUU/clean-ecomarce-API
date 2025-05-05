@@ -1,12 +1,15 @@
 import { Router } from 'express';
-import { productController } from './product.controller';
+import { ProductController } from './product.controller';
 import { validateResource } from '../../middleware/validateResource';
 import { isAuthenticated } from '../../middleware/auth.middleware';
 import { isAdmin } from '../../middleware/auth.middleware';
 import { createProductSchema, updateProductSchema, updateProductStatusSchema } from './product.schema';
 import { upload, handleProductImageUpload } from '../../middleware/upload.middleware';
-
+import { ProductService } from './product.service';
 const router = Router();
+
+const productService = new ProductService();
+const productController = new ProductController(productService);
 
 // Protected routes (require authentication)
 router.use(isAuthenticated);

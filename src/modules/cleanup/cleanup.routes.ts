@@ -1,8 +1,12 @@
 import { Router } from 'express';
-import { cleanupController } from './cleanup.controller';
+import { CleanupController } from './cleanup.controller';
+import { CleanupService } from './cleanup.service';
 // import { authMiddleware } from '../../middleware/auth.middleware';
 
 const router = Router();
+
+const cleanupService = new CleanupService();
+const cleanupController = new CleanupController(cleanupService);
 
 // Protect all cleanup routes with authentication - only admins should access
 // router.use(authMiddleware);

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Order } from './order.model';
+import { Order, OrderDocument } from './order.model';
 import { NotificationService } from '../notification/notification.service';
 
 export class OrderController {
@@ -26,7 +26,7 @@ export class OrderController {
       await order.save();
 
       // Create notification for new order
-      await NotificationService.createOrderPlacedNotification(order);
+      await NotificationService.createOrderPlacedNotification(order as OrderDocument & {customer: {name: string, email: string}});
 
       return res.status(201).json({
         success: true,
@@ -60,7 +60,7 @@ export class OrderController {
 
       // Create notification for status change
       await NotificationService.createOrderStatusChangeNotification(
-        order,
+        order as OrderDocument & {customer: {name: string, email: string}},
         oldStatus,
         newStatus
       );

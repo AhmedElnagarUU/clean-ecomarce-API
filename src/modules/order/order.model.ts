@@ -12,6 +12,7 @@ export type OrderItem = {
 
 export type OrderDocument = Document & {
   orderNumber: string;
+  _id: mongoose.Types.ObjectId;
   customer: CustomerDocument['_id'];
   items: OrderItem[];
   totalAmount: number;

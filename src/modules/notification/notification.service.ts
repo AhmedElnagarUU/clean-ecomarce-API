@@ -5,7 +5,7 @@ export class NotificationService {
   /**
    * Create a notification for a new order
    */
-  static async createOrderPlacedNotification(order: OrderDocument): Promise<NotificationDocument> {
+  static async createOrderPlacedNotification(order: OrderDocument & {customer: {name: string, email: string}}): Promise<NotificationDocument> {
     return Notification.create({
       type: 'order_placed',
       title: 'New Order Placed',
@@ -23,7 +23,7 @@ export class NotificationService {
    * Create a notification for order status change
    */
   static async createOrderStatusChangeNotification(
-    order: OrderDocument,
+    order: OrderDocument & {customer: {name: string, email: string}},
     oldStatus: string,
     newStatus: string
   ): Promise<NotificationDocument> {
@@ -45,7 +45,7 @@ export class NotificationService {
    * Create a notification for shipping status change
    */
   static async createShippingStatusChangeNotification(
-    order: OrderDocument,
+    order: OrderDocument & {customer: {name: string, email: string}},
     oldStatus: string,
     newStatus: string
   ): Promise<NotificationDocument> {

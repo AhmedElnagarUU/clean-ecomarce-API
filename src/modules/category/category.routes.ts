@@ -1,11 +1,15 @@
 import { Router } from 'express';
-import { categoryController } from './category.controller';
+import { CategoryController } from './category.controller';
 import { validateResource } from '../../middleware/validateResource';
 import { isAuthenticated } from '../../middleware/auth.middleware';
 import { isAdmin } from '../../middleware/auth.middleware';
 import { createCategorySchema, updateCategorySchema, updateCategoryStatusSchema } from './category.schema';
+import { CategoryService } from './category.service';
 
 const router = Router();
+
+const categoryService = new CategoryService();
+const categoryController = new CategoryController(categoryService);
 
 // Public routes
 router.get('/names', categoryController.getCategoryNames);
