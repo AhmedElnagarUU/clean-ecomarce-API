@@ -1,7 +1,9 @@
-import { Product, IProduct } from './product.model';
+import { Product } from './entities/product.entity';
+import { Product as ProductModel, IProduct } from './product.model';
 import { ApiError } from '../../utils/ApiError';
 import { getSignedFileUrl, deleteMultipleFromS3 } from '../../middleware/upload.middleware';
 import { CleanupService } from '../cleanup/cleanup.service';
+import { ProductMapper } from './mappers/product.mapper';
 
 const cleanupService = new CleanupService();
 
@@ -48,122 +50,93 @@ export class ProductService {
     return Promise.all(products.map(product => this.addImageUrlsToProduct(product)));
   }
 
-  async getAllProducts(): Promise<ProductWithUrls[]> {
+  async getAllProducts(): Promise<Product[]> {
     try {
-      const products = await Product.find().sort({ createdAt: -1 });
-      return this.addImageUrlsToProducts(products);
+      const products = await ProductModel.find();
+      return ProductMapper.toEntities(products);
     } catch (error) {
       throw new ApiError(500, 'Error fetching products');
     }
   }
 
-  async getProductById(id: string): Promise<ProductWithUrls> {
+  async getProductById(id: string): Promise<Product | null> {
     try {
-      const product = await Product.findById(id);
-      if (!product) {
+      const productModel = await ProductModel.findById(id);
+      if (!productModel) {
         throw new ApiError(404, 'Product not found');
       }
-      return this.addImageUrlsToProduct(product);
+      return ProductMapper.toEntity(productModel);
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, 'Error fetching product');
     }
   }
 
-  async createProduct(data: CreateProductDTO): Promise<ProductWithUrls> {
-    try {
-      const existingProduct = await Product.findOne({ name: data.name });
-      if (existingProduct) {
-        throw new ApiError(400, 'Product with this name already exists');
-      }
+  async createProduct(productData: {
+    name: string;
+    description: string;
+    price: number;
+    stock: number;
+    category: string;
+    images: string[];
+  }): Promise<Product> {
+    // 1. Create entity with business logic
+    const product = Product.create(
+      productData.name,
+      productData.description,
+      productData.price,
+      productData.stock,
+      productData.category,
+      productData.images
+    );
 
-      if (!data.images || data.images.length === 0) {
-        throw new ApiError(400, 'At least one product image is required');
-      }
+    // 2. Convert entity to model for database
+    const productModel = new ProductModel(ProductMapper.toModel(product));
 
-      const product = new Product(data);
-      await product.save();
-      return this.addImageUrlsToProduct(product);
-    } catch (error) {
-      if (error instanceof ApiError) throw error;
-      throw new ApiError(500, 'Error creating product');
-    }
+    // 3. Save to database
+    const savedModel = await productModel.save();
+
+    // 4. Convert back to entity and return
+    return ProductMapper.toEntity(savedModel);
   }
 
-  async updateProduct(id: string, data: UpdateProductDTO): Promise<ProductWithUrls> {
+  async updateProduct(id: string, updateData: Partial<Product>): Promise<Product | null> {
     try {
-      if (data.name) {
-        const existingProduct = await Product.findOne({ 
-          name: data.name,
-          _id: { $ne: id }
-        });
-        if (existingProduct) {
-          throw new ApiError(400, 'Product with this name already exists');
-        }
-      }
+      // 1. Get existing product
+      const existingModel = await ProductModel.findById(id);
+      if (!existingModel) return null;
 
-      if (data.images && data.images.length === 0) {
-        throw new ApiError(400, 'At least one product image is required');
-      }
+      // 2. Convert to entity
+      const product = ProductMapper.toEntity(existingModel);
 
-      const product = await Product.findByIdAndUpdate(
+      // 3. Update entity with business logic
+      if (updateData.name) product.name = updateData.name;
+      if (updateData.description) product.description = updateData.description;
+      if (updateData.price) product.price = updateData.price;
+      if (updateData.stock) product.stock = updateData.stock;
+      if (updateData.category) product.category = updateData.category;
+      if (updateData.images) product.images = updateData.images;
+      if (updateData.status) product.status = updateData.status;
+
+      // 4. Convert back to model and save
+      const updatedModel = await ProductModel.findByIdAndUpdate(
         id,
-        { $set: data },
-        { new: true, runValidators: true }
+        ProductMapper.toModel(product),
+        { new: true }
       );
 
-      if (!product) {
-        throw new ApiError(404, 'Product not found');
-      }
-
-      return this.addImageUrlsToProduct(product);
+      // 5. Return updated entity
+      return updatedModel ? ProductMapper.toEntity(updatedModel) : null;
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, 'Error updating product');
     }
   }
 
-  async deleteProduct(id: string): Promise<void> {
+  async deleteProduct(id: string): Promise<boolean> {
     try {
-      const product = await Product.findById(id);
-      if (!product) {
-        throw new ApiError(404, 'Product not found');
-      }
-
-      // Delete images from S3 before deleting the product
-      if (product.images && product.images.length > 0) {
-        console.log(`Attempting to delete ${product.images.length} images from S3 for product ${id}`);
-        
-        // Use the enhanced deleteMultipleFromS3 function that returns status
-        const deletionResult = await deleteMultipleFromS3(product.images);
-        
-        if (deletionResult.success) {
-          console.log(`Successfully deleted all images from S3 for product ${id}`);
-        } else {
-          // Some images failed to delete
-          console.warn(`Partial S3 deletion for product ${id}: 
-            ${deletionResult.deletedKeys.length} succeeded, 
-            ${deletionResult.failedKeys.length} failed`);
-          
-          if (deletionResult.failedKeys.length > 0) {
-            // Create a cleanup task for the failed images
-            try {
-              await cleanupService.createCleanupTask(
-                'product',
-                id,
-                deletionResult.failedKeys
-              );
-              console.log(`Created cleanup task for remaining ${deletionResult.failedKeys.length} images`);
-            } catch (cleanupError) {
-              console.error('Failed to create cleanup task:', cleanupError);
-            }
-          }
-        }
-      }
-
-      // Delete the product from database
-      await Product.findByIdAndDelete(id);
-      
+      const result = await ProductModel.findByIdAndDelete(id);
+      return !!result;
     } catch (error) {
       if (error instanceof ApiError) throw error;
       console.error('Error in deleteProduct:', error);
@@ -173,7 +146,7 @@ export class ProductService {
 
   async updateProductStatus(id: string, status: 'active' | 'inactive'): Promise<ProductWithUrls> {
     try {
-      const product = await Product.findByIdAndUpdate(
+      const product = await ProductModel.findByIdAndUpdate(
         id,
         { $set: { status } },
         { new: true, runValidators: true }
@@ -188,5 +161,23 @@ export class ProductService {
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, 'Error updating product status');
     }
+  }
+
+  async updateStock(id: string, quantity: number): Promise<Product | null> {
+    // 1. Get product
+    const product = await this.getProductById(id);
+    if (!product) return null;
+
+    // 2. Update stock using entity business logic
+    product.updateStock(quantity);
+
+    // 3. Save changes
+    const updatedModel = await ProductModel.findByIdAndUpdate(
+      id,
+      ProductMapper.toModel(product),
+      { new: true }
+    );
+
+    return updatedModel ? ProductMapper.toEntity(updatedModel) : null;
   }
 } 
