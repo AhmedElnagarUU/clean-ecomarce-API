@@ -2,7 +2,7 @@ import express from 'express';
 import adminRoutes from '../../modules/admin/admin.routes';
 import authRoutes from '../../modules/auth/auth.routes';
 import dashboardRoutes from '../../modules/dashboard/dashboard.routes';
-import productRoutes from '../../modules/product/product.routes';
+import productRoutes from '../../modules/product/infra/product.routes';
 import orderRoutes from '../../modules/order/order.routes';
 import categoryRoutes from '../../modules/category/category.routes';
 import cleanupRoutes from '../../modules/cleanup/cleanup.routes';

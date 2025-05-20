@@ -3,6 +3,7 @@ export class Product {
     private _name: string;
     private _description: string;
     private _slug: string;
+    private _sku: string;
     private _price: number;
     private _stock: number;
     private _category: string;
@@ -15,6 +16,7 @@ export class Product {
         name: string,
         description: string,
         price: number,
+        sku: string,
         stock: number,
         category: string,
         images: string[],
@@ -26,6 +28,7 @@ export class Product {
         this._name = name;
         this._description = description;
         this._price = price;
+        this._sku = sku;
         this._stock = stock;
         this._category = category;
         this._images = images;
@@ -57,6 +60,10 @@ export class Product {
         return this._price;
     }
 
+    get sku(): string {
+        return this._sku;
+    }
+
     get stock(): number {
         return this._stock;
     }
@@ -81,52 +88,90 @@ export class Product {
         return this._updatedAt;
     }
 
-    // Setters with validation
-    set name(value: string) {
-        if (!value || value.trim().length === 0) {
+    // Private validation methods
+    private static validateName(name: string): void {
+        if (!name || name.trim().length === 0) {
             throw new Error('Product name cannot be empty');
         }
+    }
+
+    private static validateDescription(description: string): void {
+        if (!description || description.trim().length === 0) {
+            throw new Error('Product description cannot be empty');
+        }
+    }
+
+    private static validatePrice(price: number): void {
+        if (price < 0) {
+            throw new Error('Price cannot be negative');
+        }
+    }
+
+    private static validateStock(stock: number): void {
+        if (stock < 0) {
+            throw new Error('Stock cannot be negative');
+        }
+    }
+
+    private static validateCategory(category: string): void {
+        if (!category || category.trim().length === 0) {
+            throw new Error('Category cannot be empty');
+        }
+    }
+
+    private static validateImages(images: string[]): void {
+        if (!Array.isArray(images) || images.length === 0) {
+            throw new Error('Product must have at least one image');
+        }
+    }
+
+    private static generateSku(sku: string): string {
+        if (!sku || sku.trim().length === 0) {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000);
+            return `SKU-${timestamp}-${random}`;
+        }
+        return sku;
+    }
+
+    // Setters with validation
+    set name(value: string) {
+        Product.validateName(value);
         this._name = value;
         this._slug = this.generateSlug(value);
     }
 
     set description(value: string) {
-        if (!value || value.trim().length === 0) {
-            throw new Error('Product description cannot be empty');
-        }
+        Product.validateDescription(value);
         this._description = value;
     }
 
     set price(value: number) {
-        if (value < 0) {
-            throw new Error('Price cannot be negative');
-        }
+        Product.validatePrice(value);
         this._price = value;
     }
 
     set stock(value: number) {
-        if (value < 0) {
-            throw new Error('Stock cannot be negative');
-        }
+        Product.validateStock(value);
         this._stock = value;
     }
 
     set category(value: string) {
-        if (!value || value.trim().length === 0) {
-            throw new Error('Category cannot be empty');
-        }
+        Product.validateCategory(value);
         this._category = value;
     }
 
     set images(value: string[]) {
-        if (!Array.isArray(value) || value.length === 0) {
-            throw new Error('Product must have at least one image');
-        }
+        Product.validateImages(value);
         this._images = [...value];
     }
 
     set status(value: 'active' | 'inactive') {
         this._status = value;
+    }
+
+    set sku(value: string) {
+        this._sku = Product.generateSku(value);
     }
 
     // Business logic methods
@@ -167,15 +212,29 @@ export class Product {
         name: string,
         description: string,
         price: number,
+        sku: string,
         stock: number,
         category: string,
         images: string[],
         status: 'active' | 'inactive' = 'active'
     ): Product {
+        // Validate all inputs before creating the product
+        Product.validateName(name);
+        Product.validateDescription(description);
+        Product.validatePrice(price);
+        Product.validateStock(stock);
+        Product.validateCategory(category);
+        Product.validateImages(images);
+        
+        // Generate SKU if needed
+        sku = Product.generateSku(sku);
+
+        // Create and return the product with validated data
         return new Product(
             name,
             description,
             price,
+            sku,
             stock,
             category,
             images,
@@ -190,6 +249,7 @@ export class Product {
             name: this._name,
             description: this._description,
             slug: this._slug,
+            sku: this._sku,
             price: this._price,
             stock: this._stock,
             category: this._category,

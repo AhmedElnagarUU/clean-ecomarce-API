@@ -1,15 +1,19 @@
 import { Router } from 'express';
 import { ProductController } from './product.controller';
-import { validateResource } from '../../middleware/validateResource';
-import { isAuthenticated } from '../../middleware/auth.middleware';
-import { isAdmin } from '../../middleware/auth.middleware';
-import { createProductSchema, updateProductSchema, updateProductStatusSchema } from './product.schema';
-import { upload, handleProductImageUpload } from '../../middleware/upload.middleware';
-import { ProductService } from './product.service';
+import { validateResource } from '../../../middleware/validateResource';
+import { isAuthenticated } from '../../../middleware/auth.middleware';
+import { isAdmin } from '../../../middleware/auth.middleware';
+import { createProductSchema, updateProductSchema, updateProductStatusSchema } from '../product.schema';
+import { upload, handleProductImageUpload } from '../../../middleware/upload.middleware';
+import { ProductService } from '../product.service';
+import { ProductUseCase } from '../application/product.usecase';
+import { ProductMongoRepository } from './product.mongo.repo';
 const router = Router();
 
-const productService = new ProductService();
-const productController = new ProductController(productService);
+const repository = new ProductMongoRepository();
+const productUseCase = new ProductUseCase(repository);
+const productController = new ProductController(productUseCase);
+
 
 // Protected routes (require authentication)
 router.use(isAuthenticated);

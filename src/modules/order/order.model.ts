@@ -1,6 +1,6 @@
 import mongoose, { Document } from 'mongoose';
 import { CustomerDocument } from '../customer/customer.model';
-import { IProduct } from '../product/product.model';
+import { IProduct } from '../product/infra/product.model';
 
 export type OrderStatus = 'pending' | 'processing' | 'completed' | 'cancelled';
 

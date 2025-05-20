@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import { ProductService } from './product.service';
-import { asyncHandler } from '../../utils/asyncHandler';
-import { ApiResponse } from '../../utils/ApiResponse';
+import { ProductUseCase } from '../application/product.usecase';
+import { asyncHandler } from '../../../utils/asyncHandler';
+import { ApiResponse } from '../../../utils/ApiResponse';
 
 export class ProductController {
-  constructor(private productService: ProductService) {}
+  constructor(private productService: ProductUseCase) {}
 
   getAllProducts = asyncHandler(async (req: Request, res: Response) => {
     const products = await this.productService.getAllProducts();

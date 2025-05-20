@@ -1,5 +1,5 @@
 import { Product } from './entities/product.entity';
-import { Product as ProductModel, IProduct } from './product.model';
+import { Product as ProductModel, IProduct } from './infra/product.model';
 import { ApiError } from '../../utils/ApiError';
 import { getSignedFileUrl, deleteMultipleFromS3 } from '../../middleware/upload.middleware';
 import { CleanupService } from '../cleanup/cleanup.service';

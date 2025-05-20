@@ -1,5 +1,5 @@
 import { Order } from '../order/order.model';
-import { Product } from '../product/product.model';
+import { Product } from '../product/infra/product.model';
 import { Customer } from '../customer/customer.model';
 
 export class DashboardService {
