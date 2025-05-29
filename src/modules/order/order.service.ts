@@ -33,7 +33,7 @@ export class OrderService {
       .populate('items.product', 'name price');
   }
 
-  static async updateOrderStatus(id: string, newStatus: string) {
+  static async updateOrderStatus(id: string, newStatus: any) {
     const order = await Order.findById(id);
     
     if (!order) {

@@ -1,16 +1,16 @@
 export class Product {
-    private _id?: string;
-    private _name: string;
-    private _description: string;
-    private _slug: string;
-    private _sku: string;
-    private _price: number;
-    private _stock: number;
-    private _category: string;
-    private _images: string[];
-    private _status: 'active' | 'inactive';
-    private _createdAt?: Date;
-    private _updatedAt?: Date;
+    public _id?: string;
+    public _name: string;
+    public _description: string;
+    public _slug: string;
+    public _sku: string;
+    public _price: number;
+    public _stock: number;
+    public _category: string;
+    public _images: string[];
+    public _status: 'active' | 'inactive';
+    public _createdAt?: Date;
+    public _updatedAt?: Date;
 
     constructor(
         name: string,
@@ -185,7 +185,7 @@ export class Product {
             throw new Error('Insufficient stock');
         }
         this._stock = newStock;
-    }
+    }     
 
     public isActive(): boolean {
         return this._status === 'active';
@@ -202,9 +202,9 @@ export class Product {
     // Helper methods
     private generateSlug(name: string): string {
         return name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, '');
+            // .toLowerCase()
+            // .replace(/[^a-z0-9]+/g, '-')
+            // .replace(/(^-|-$)/g, '');
     }
 
     // Static factory methods
@@ -216,15 +216,17 @@ export class Product {
         stock: number,
         category: string,
         images: string[],
-        status: 'active' | 'inactive' = 'active'
+        status: 'active' | 'inactive' = 'active',
+        id?: string,
+      
     ): Product {
         // Validate all inputs before creating the product
-        Product.validateName(name);
-        Product.validateDescription(description);
-        Product.validatePrice(price);
-        Product.validateStock(stock);
-        Product.validateCategory(category);
-        Product.validateImages(images);
+        // Product.validateName(name);
+        // Product.validateDescription(description);
+        // Product.validatePrice(price);
+        // Product.validateStock(stock);
+        // Product.validateCategory(category);
+        // // Product.validateImages(images);
         
         // Generate SKU if needed
         sku = Product.generateSku(sku);
@@ -238,14 +240,15 @@ export class Product {
             stock,
             category,
             images,
-            status
+            status,
+            id
         );
     }
 
     // Data transfer object methods
     public toDTO() {
         return {
-            id: this._id,
+            id: this._id ?? '',
             name: this._name,
             description: this._description,
             slug: this._slug,

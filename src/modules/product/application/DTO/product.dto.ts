@@ -4,17 +4,11 @@ export interface CreateProductDTO {
     price: number;
     stock: number;
     category: string;
+    images?: string[];
     status?: 'active' | 'inactive';
 }
 
-export interface UpdateProductDTO {
-    name?: string;
-    description?: string;
-    price?: number;
-    stock?: number;
-    category?: string;
-    status?: 'active' | 'inactive';
-}
+export interface UpdateProductDTO extends Partial<CreateProductDTO> {}
 
 export interface UpdateProductStatusDTO {
     status: 'active' | 'inactive';
@@ -22,6 +16,7 @@ export interface UpdateProductStatusDTO {
 
 export interface ProductQueryDTO {
     page?: number;
+    
     limit?: number;
     category?: string;
     status?: 'active' | 'inactive';

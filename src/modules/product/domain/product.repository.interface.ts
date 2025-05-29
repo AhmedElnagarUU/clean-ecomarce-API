@@ -5,7 +5,7 @@ export  interface IProductReposiory {
     create(product:Product):Promise<Product>
     findById(id:string):Promise<Product | null>
     getAll(query?:ProductQueryDTO):Promise<Product[]>
-    update(id:string , product: Partial<Product>):Promise<Product | null>
+    update(id:string , product: Product):Promise<Product | null>
     delete(id:string):Promise<boolean>
 }
 

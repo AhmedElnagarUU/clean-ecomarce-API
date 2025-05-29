@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { DashboardController } from './dashboard.controller';
+import * as DashboardController from './dashboard.controller';
 import { isAuthenticated, isAdmin } from '../../middleware/auth.middleware';
 
 const router = Router();

@@ -3,9 +3,7 @@ import { ProductController } from './product.controller';
 import { validateResource } from '../../../middleware/validateResource';
 import { isAuthenticated } from '../../../middleware/auth.middleware';
 import { isAdmin } from '../../../middleware/auth.middleware';
-import { createProductSchema, updateProductSchema, updateProductStatusSchema } from '../product.schema';
 import { upload, handleProductImageUpload } from '../../../middleware/upload.middleware';
-import { ProductService } from '../product.service';
 import { ProductUseCase } from '../application/product.usecase';
 import { ProductMongoRepository } from './product.mongo.repo';
 const router = Router();
@@ -27,20 +25,20 @@ router.route('/')
     // validateResource(createProductSchema),
     productController.createProduct
   );
+       
+// router.route('/:id')
+//   .get(productController.getProductById)
+//   .put(
+//     upload.array('images', 5), // Allow up to 5 images
+//     handleProductImageUpload,
+//     validateResource(updateProductSchema),
+//     productController.updateProduct
+//   )
+//   .delete(productController.deleteProduct);
 
-router.route('/:id')
-  .get(productController.getProductById)
-  .put(
-    upload.array('images', 5), // Allow up to 5 images
-    handleProductImageUpload,
-    validateResource(updateProductSchema),
-    productController.updateProduct
-  )
-  .delete(productController.deleteProduct);
-
-router.patch('/:id/status', 
-  validateResource(updateProductStatusSchema),
-  productController.updateProductStatus
-);
+// router.patch('/:id/status', 
+//   validateResource(updateProductStatusSchema),
+//   productController.updateProductStatus
+// );
 
 export default router; 

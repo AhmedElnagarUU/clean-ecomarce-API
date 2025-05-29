@@ -5,12 +5,13 @@ import { Product as ProductModel } from "./product.model";
 
 export class ProductMongoRepository implements IProductReposiory {
     async update(id: string, product: Partial<Product>): Promise<Product | null> {
+        const updateData = product instanceof Product ? product.toDTO() : product;
         const updatedProduct = await ProductModel.findByIdAndUpdate(
             id,
-            { $set: product },
+            { $set: updateData },
             { new: true, runValidators: true }
         );
-        return updatedProduct ? updatedProduct.toObject() : null;
+        return updatedProduct as unknown as Product;
     }
 
     async delete(id: string): Promise<boolean> {
@@ -19,17 +20,17 @@ export class ProductMongoRepository implements IProductReposiory {
     }
 
     async create(product: Product): Promise<Product> {
-        const newProduct = await ProductModel.create(product);
-        return newProduct.toObject();
+        const newProduct = await ProductModel.create(product.toDTO());
+        return newProduct as unknown as Product;
     }
 
     async findById(id: string): Promise<Product | null> {
         const product = await ProductModel.findById(id);
-        return product ? product.toObject() : null;
+        return product as unknown as Product;
     }
 
     async getAll(query?:ProductQueryDTO): Promise<Product[]> {
         const products = await ProductModel.find();
-        return products.map((product : any) => product.toObject());
+        return products as unknown as Product[];
     }
 }

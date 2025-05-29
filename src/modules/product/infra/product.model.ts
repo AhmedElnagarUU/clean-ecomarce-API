@@ -2,29 +2,28 @@ import { Schema, model, Document } from 'mongoose';
 import slugify from 'slugify';
 
 export interface IProduct extends Document {
-  name: string;
-  description: string;
-  slug: string;
-  price: number;
-  stock: number;
-  category: string;
-  images: string[];
-  status: 'active' | 'inactive';
-  createdAt: Date;
-  updatedAt: Date;
+  name?: string;
+  description?: string;
+  slug?: string;
+  price?: number;
+  stock?: number;
+  category?: string;
+  images?: string[];
+  status?: 'active' | 'inactive';
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const productSchema = new Schema<IProduct>(
   {
     name: {
       type: String,
-      required: [true, 'Product name is required'],
-      unique: true,
+      required: false,
       trim: true,
     },
     description: {
       type: String,
-      required: [true, 'Product description is required'],
+      required: false,
     },
     slug: {
       type: String,
@@ -32,21 +31,21 @@ const productSchema = new Schema<IProduct>(
     },
     price: {
       type: Number,
-      required: [true, 'Product price is required'],
+      required: false,
       min: [0, 'Price cannot be negative'],
     },
     stock: {
       type: Number,
-      required: [true, 'Product stock is required'],
+      required: false,
       min: [0, 'Stock cannot be negative'],
     },
     category: {
       type: String,
-      required: [true, 'Product category is required'],
+      required: false,
     },
     images: [{
       type: String,
-      required: true
+      required: false
     }],
     status: {
       type: String,
@@ -62,9 +61,9 @@ const productSchema = new Schema<IProduct>(
 // Create slug from name before saving
 productSchema.pre('save', function(next) {
   if (this.isModified('name')) {
-    this.slug = slugify(this.name, { lower: true });
+    this.slug = slugify(this.name ?? '', { lower: true });
   }
   next();
 });
-
-export const Product = model<IProduct>('Product', productSchema); 
+          
+export const Product = model<IProduct>('Product', productSchema);
