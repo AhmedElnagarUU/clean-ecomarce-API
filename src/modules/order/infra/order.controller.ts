@@ -79,6 +79,33 @@ export class OrderController {
     }
   }
 
+async getOrdersByStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const { status } = req.params;
+      // Ensure status is correctly typed for orderUseCase.getOrdersByStatus
+      const orders = await this.orderUseCase.getOrdersByStatus(status as any); 
+      res.json(new ApiResponse(200, orders));
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  }
+
+  async getOrdersByDateRange(req: Request, res: Response): Promise<void> {
+    try {
+      const { startDate, endDate } = req.query;
+      if (!startDate || !endDate) {
+        res.status(400).json({ message: 'Start date and end date are required' });
+        return;
+      }
+      const orders = await this.orderUseCase.getOrdersByDateRange(
+        new Date(startDate as string),
+        new Date(endDate as string)
+      );
+      res.json(new ApiResponse(200, orders));
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  }
   async updateOrderStatus(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;

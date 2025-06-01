@@ -56,7 +56,7 @@ export class CategoryController {
     }
   }
 
-  async deleteCategory(req: Request, res: Response): Promise<void> {
+  async deleteCategory(req: Request, res: Response): Promise<any> {
     try {
       const { id } = req.params;
       const success = await this.categoryUseCase.deleteCategory(id);

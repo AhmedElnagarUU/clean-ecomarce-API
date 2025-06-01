@@ -22,6 +22,8 @@ router.get('/:id', (req, res) => orderController.getOrderById(req, res));
 // Admin routes
 router.use(isAdmin);
 router.get('/', (req, res) => orderController.getAllOrders(req, res));
+router.get('/status/:status', (req, res) => orderController.getOrdersByStatus(req, res));
+router.get('/date-range', (req, res) => orderController.getOrdersByDateRange(req, res));
 router.put('/:id', (req, res) => orderController.updateOrder(req, res));
 router.delete('/:id', (req, res) => orderController.deleteOrder(req, res));
 router.patch('/:id/status', (req, res) => orderController.updateOrderStatus(req, res));

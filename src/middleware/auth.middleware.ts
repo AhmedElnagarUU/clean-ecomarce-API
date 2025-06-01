@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-import { AdminRole, Admin } from '../modules/admin/admin.model';
+import { AdminRole, Admin } from '../modules/admin/domain/entities/admin.entity';
 
 // Extend Express Request type to include admin information
 declare global {
@@ -93,7 +93,7 @@ export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const isSuperAdmin = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.user || (req.user as typeof Admin.prototype).role !== 'superadmin') {
+  if (!req.user || (req.user as { role: string }).role !== 'superadmin') {
     return res.status(403).json({ message: 'Forbidden - Super Admin access required' });
   }
   next();

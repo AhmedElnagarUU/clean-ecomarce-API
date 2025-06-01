@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { Category } from '../domain/entities/category.entity';
 import slugify from 'slugify';
 
-export interface CategoryDocument extends Category, Document {}
+export interface CategoryDocument extends Omit<Category, 'id'>, Document {}
 
 export interface ICategory {
   name: string;

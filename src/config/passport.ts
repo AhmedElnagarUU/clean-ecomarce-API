@@ -3,7 +3,7 @@ import {Strategy as localStrategy} from 'passport-local'
 import bcrypt from 'bcrypt'
 import { AdminUseCase } from '../modules/admin/application/admin.usecase'
 import { IAdminRepository } from '../modules/admin/domain/repositories/admin.repository.interface'
-import { AdminRepository } from '../modules/admin/infrastructure/admin.repository'
+import { AdminRepository } from '../modules/admin/infra/admin.repository'
 
 const adminRepository: IAdminRepository = new AdminRepository();
 const adminUseCase = new AdminUseCase(adminRepository);

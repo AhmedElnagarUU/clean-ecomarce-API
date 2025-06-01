@@ -1,26 +1,24 @@
-import { Category, ICategory } from './category.model';
-import { ApiError } from '../../utils/ApiError';
+import { ICategoryRepository } from '../domain/category.repository.interface';
+import { Category } from '../domain/entities/category.entity';
+import { CreateCategoryDto } from './DTO/create-category.dto';
+import { UpdateCategoryDto } from './DTO/update-category.dto';
+import { ApiError } from '../../../utils/ApiError';
+import slugify from 'slugify';
 
-export interface CreateCategoryDTO {
-  name: string;
-  description: string;
-  status?: 'active' | 'inactive';
-}
+export class CategoryUseCase {
+  constructor(private readonly categoryRepository: ICategoryRepository) {}
 
-export interface UpdateCategoryDTO extends Partial<CreateCategoryDTO> {}
-
-export class CategoryService {
-  async getAllCategories(): Promise<ICategory[]> {
+  async getAllCategories(): Promise<Category[]> {
     try {
-      return await Category.find().sort({ createdAt: -1 });
+      return await this.categoryRepository.findAll();
     } catch (error) {
       throw new ApiError(500, 'Error fetching categories');
     }
   }
 
-  async getCategoryById(id: string): Promise<ICategory> {
+  async getCategoryById(id: string): Promise<Category> {
     try {
-      const category = await Category.findById(id);
+      const category = await this.categoryRepository.findById(id);
       if (!category) {
         throw new ApiError(404, 'Category not found');
       }
@@ -31,44 +29,45 @@ export class CategoryService {
     }
   }
 
-  async createCategory(data: CreateCategoryDTO): Promise<ICategory> {
+  async createCategory(dto: CreateCategoryDto): Promise<Category> {
     try {
-      const existingCategory = await Category.findOne({ name: data.name });
-      if (existingCategory) {
-        throw new ApiError(400, 'Category with this name already exists');
-      }
-
-      const category = new Category(data);
-      return await category.save();
+      const slug = slugify(dto.name, { lower: true });
+      const category: Partial<Category> = {
+        ...dto,
+        slug,
+        isActive: dto.isActive ?? true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      return await this.categoryRepository.create(category as Category);
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, 'Error creating category');
     }
   }
 
-  async updateCategory(id: string, data: UpdateCategoryDTO): Promise<ICategory> {
+  async updateCategory(id: string, dto: UpdateCategoryDto): Promise<Category> {
     try {
-      if (data.name) {
-        const existingCategory = await Category.findOne({ 
-          name: data.name,
-          _id: { $ne: id }
-        });
-        if (existingCategory) {
-          throw new ApiError(400, 'Category with this name already exists');
-        }
-      }
-
-      const category = await Category.findByIdAndUpdate(
-        id,
-        { $set: data },
-        { new: true, runValidators: true }
-      );
-
-      if (!category) {
+      const existingCategory = await this.categoryRepository.findById(id);
+      if (!existingCategory) {
         throw new ApiError(404, 'Category not found');
       }
 
-      return category;
+      const updateData: Partial<Category> = {
+        ...dto,
+        updatedAt: new Date(),
+      };
+
+      if (dto.name) {
+        updateData.slug = slugify(dto.name, { lower: true });
+      }
+
+      const updatedCategory = await this.categoryRepository.update(id, updateData);
+      if (!updatedCategory) {
+        throw new ApiError(404, 'Category not found');
+      }
+
+      return updatedCategory;
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, 'Error updating category');
@@ -77,8 +76,8 @@ export class CategoryService {
 
   async deleteCategory(id: string): Promise<void> {
     try {
-      const category = await Category.findByIdAndDelete(id);
-      if (!category) {
+      const success = await this.categoryRepository.delete(id);
+      if (!success) {
         throw new ApiError(404, 'Category not found');
       }
     } catch (error) {
@@ -87,19 +86,23 @@ export class CategoryService {
     }
   }
 
-  async updateCategoryStatus(id: string, status: 'active' | 'inactive'): Promise<ICategory> {
+  async updateCategoryStatus(id: string, isActive: boolean): Promise<Category> {
     try {
-      const category = await Category.findByIdAndUpdate(
-        id,
-        { $set: { status } },
-        { new: true, runValidators: true }
-      );
-
-      if (!category) {
+      const existingCategory = await this.categoryRepository.findById(id);
+      if (!existingCategory) {
         throw new ApiError(404, 'Category not found');
       }
 
-      return category;
+      const updatedCategory = await this.categoryRepository.update(id, {
+        isActive,
+        updatedAt: new Date(),
+      });
+
+      if (!updatedCategory) {
+        throw new ApiError(404, 'Category not found');
+      }
+
+      return updatedCategory;
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, 'Error updating category status');
@@ -108,8 +111,10 @@ export class CategoryService {
 
   async getCategoryNames(): Promise<string[]> {
     try {
-      const categories = await Category.find({ status: 'active' }).select('name');
-      return categories.map(category => category.name);
+      const categories = await this.categoryRepository.findAll();
+      return categories
+        .filter(category => category.isActive)
+        .map((category: Category) => category.name);
     } catch (error) {
       throw new ApiError(500, 'Error fetching category names');
     }
