@@ -2,7 +2,8 @@ import { Request, Response } from 'express';
 import { CleanupUseCase } from '../application/cleanup.usecase';
 import { CreateCleanupDto } from '../application/DTO/create-cleanup.dto';
 import { UpdateCleanupDto } from '../application/DTO/update-cleanup.dto';
-import { CleanupRepository } from './repositories/cleanup.repository';
+import { CleanupRepository } from './cleanup.repository';
+import { CleanupType } from '../domain/entities/cleanup.entity';
 
 export class CleanupController {
   private cleanupUseCase: CleanupUseCase;
@@ -10,7 +11,7 @@ export class CleanupController {
   constructor() {
     const cleanupRepository = new CleanupRepository();
     this.cleanupUseCase = new CleanupUseCase(cleanupRepository);
-  }
+  }    
 
   async createCleanup(req: Request, res: Response): Promise<void> {
     try {
@@ -39,7 +40,12 @@ export class CleanupController {
   async getCleanupsByType(req: Request, res: Response): Promise<void> {
     try {
       const { type } = req.params;
-      const cleanups = await this.cleanupUseCase.getCleanupsByType(type);
+      const validTypes: CleanupType[] = ['expired_sessions', 'old_notifications', 'temporary_files', 'failed_payments', 'abandoned_carts'];
+      if (!validTypes.includes(type as CleanupType)) {
+        res.status(400).json({ message: 'Invalid cleanup type' });
+        return;
+      }
+      const cleanups = await this.cleanupUseCase.getCleanupsByType(type as CleanupType);
       res.json(cleanups);
     } catch (error) {
       res.status(500).json({ message: 'Error retrieving cleanup tasks', error });

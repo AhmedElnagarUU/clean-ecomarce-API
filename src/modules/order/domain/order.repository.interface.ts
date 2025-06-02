@@ -1,6 +1,8 @@
 import { Order } from './entities/order.entity';
 
 export interface IOrderRepository {
+  findByDateRange(startDate: Date, endDate: Date): Order[] | PromiseLike<Order[]>;
+  findByStatus(status: string): Order[] | PromiseLike<Order[]>;
   create(order: Order): Promise<Order>;
   findById(id: string): Promise<Order | null>;
   findByUserId(userId: string): Promise<Order[]>;

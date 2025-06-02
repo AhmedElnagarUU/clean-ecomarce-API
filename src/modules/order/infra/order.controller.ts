@@ -65,7 +65,7 @@ export class OrderController {
     }
   }
 
-  async deleteOrder(req: Request, res: Response): Promise<void> {
+  async deleteOrder(req: Request, res: Response): Promise<any> {
     try {
       const { id } = req.params;
       const success = await this.orderUseCase.deleteOrder(id);

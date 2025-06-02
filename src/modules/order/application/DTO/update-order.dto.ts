@@ -9,6 +9,7 @@ export interface UpdateOrderDto {
     state: string;
     country: string;
     zipCode: string;
+    phone: string;
   };
   paymentStatus?: 'pending' | 'paid' | 'failed';
   paymentMethod?: string;

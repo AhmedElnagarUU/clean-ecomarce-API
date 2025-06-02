@@ -11,7 +11,7 @@ export class NotificationController {
       const createNotificationDto: CreateNotificationDto = req.body;
       const notification = await this.notificationUseCase.createNotification(createNotificationDto);
       res.status(201).json(notification);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
   }
@@ -25,7 +25,7 @@ export class NotificationController {
         return;
       }
       res.json(notification);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
   }
@@ -35,7 +35,7 @@ export class NotificationController {
       const { userId } = req.params;
       const notifications = await this.notificationUseCase.getNotificationsByUserId(userId);
       res.json(notifications);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
   }
@@ -45,7 +45,7 @@ export class NotificationController {
       const { type } = req.params;
       const notifications = await this.notificationUseCase.getNotificationsByType(type as any);
       res.json(notifications);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
   }
@@ -55,7 +55,7 @@ export class NotificationController {
       const { status } = req.params;
       const notifications = await this.notificationUseCase.getNotificationsByStatus(status as any);
       res.json(notifications);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
   }
@@ -70,7 +70,7 @@ export class NotificationController {
         return;
       }
       res.json(notification);
-    } catch (error) {
+    } catch (error: any   ) {
       res.status(400).json({ message: error.message });
     }
   }
@@ -84,7 +84,7 @@ export class NotificationController {
         return;
       }
       res.json(notification);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
   }
@@ -98,7 +98,7 @@ export class NotificationController {
         return;
       }
       res.status(204).send();
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
   }
@@ -112,7 +112,7 @@ export class NotificationController {
         return;
       }
       res.status(204).send();
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
   }
@@ -126,7 +126,7 @@ export class NotificationController {
         return;
       }
       res.status(204).send();
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
   }

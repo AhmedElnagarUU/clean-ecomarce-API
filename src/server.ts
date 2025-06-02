@@ -8,7 +8,7 @@ import v1Routes from './routes/v1';
 import logger from './config/logger';
 import { httpLogger } from './middleware/logging.middleware';
 import { startCleanupScheduler } from './utils/scheduler';
-import notificationRoutes from './modules/notification/notification.routes';
+import notificationRoutes from './modules/notification/infra/notification.routes';
 
 import session from 'express-session';
 

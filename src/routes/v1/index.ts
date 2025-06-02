@@ -1,11 +1,10 @@
 import express from 'express';
 import adminRoutes from '../../modules/admin/infra/admin.routes';
-import authRoutes from '../../modules/authxxxxx/infra/auth.routes';
-import dashboardRoutes from '../../modules/dashboard/dashboard.routes';
+import dashboardRoutes from '../../modules/dashboard/infra/dashboard.routes';
 import productRoutes from '../../modules/product/infra/product.routes';
 import orderRoutes from '../../modules/order/infra/order.routes';
 import categoryRoutes from '../../modules/category/infra/category.routes';
-import cleanupRoutes from '../../modules/cleanup/cleanup.routes';
+import cleanupRoutes from '../../modules/cleanup/infra/cleanup.routes';
 
 const router = express.Router();
 

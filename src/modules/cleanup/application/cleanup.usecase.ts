@@ -3,7 +3,7 @@ import { Cleanup, CleanupStatus, CleanupType } from '../domain/entities/cleanup.
 import { CreateCleanupDto } from './DTO/create-cleanup.dto';
 import { UpdateCleanupDto } from './DTO/update-cleanup.dto';
 
-export class CleanupUseCase {
+export class CleanupUseCase {     
   constructor(private readonly cleanupRepository: ICleanupRepository) {}
 
   async createCleanup(dto: CreateCleanupDto): Promise<Cleanup> {

@@ -1,5 +1,5 @@
 import mongoose, { Document } from 'mongoose';
-import { CustomerDocument } from '../../customer/customer.model';
+import { CustomerDocument } from '../../customer/infra/customer.model';
 import { IProduct } from '../../product/infra/product.model';
 import { IOrderRepository } from '../domain/order.repository.interface';
 import { Order, OrderStatus } from '../domain/entities/order.entity';
@@ -24,6 +24,7 @@ export interface OrderDocument extends Document {
     state: string;
     zipCode: string;
     country: string;
+    phone: string;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -77,7 +78,8 @@ const orderSchema = new mongoose.Schema({
     city: String,
     state: String,
     zipCode: String,
-    country: String
+    country: String,
+    phone: String
   }
 }, {
   timestamps: true
@@ -158,10 +160,28 @@ export class OrderRepository implements IOrderRepository {
     return order ? this.mapToDomain(order) : null;
   }
 
+  async findByStatus(status: OrderStatus): Promise<Order[]> {
+    const orders = await OrderModel.find({ status })
+      .populate('customer', 'name email')
+      .populate('items.product', 'name price');
+    return orders.map(this.mapToDomain);
+  }
+
+  async findByDateRange(startDate: Date, endDate: Date): Promise<Order[]> {
+    const orders = await OrderModel.find({
+      createdAt: {
+        $gte: startDate,
+        $lte: endDate
+      }
+    }).populate('customer', 'name email')
+      .populate('items.product', 'name price');
+    return orders.map(this.mapToDomain);
+  }
+
   private mapToDomain(orderDoc: OrderDocument): Order {
     return {
       id: orderDoc._id.toString(),
-      userId: orderDoc.customer.toString(),
+      userId: (orderDoc.customer as any).toString(),
       items: orderDoc.items.map(item => ({
         productId: item.product.toString(),
         quantity: item.quantity,
@@ -171,7 +191,11 @@ export class OrderRepository implements IOrderRepository {
       })),
       totalAmount: orderDoc.totalAmount,
       status: orderDoc.status as OrderStatus,
-      shippingAddress: orderDoc.shippingAddress,
+      paymentStatus: orderDoc.paymentStatus,
+      shippingAddress: {
+        ...orderDoc.shippingAddress,
+        phone: orderDoc.shippingAddress.phone || ''
+      },
       shippingMethod: 'standard', // Default value
       shippingCost: 0, // Default value
       tax: 0, // Default value

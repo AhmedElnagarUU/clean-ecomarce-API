@@ -24,6 +24,7 @@ export interface Order {
   items: OrderItem[];
   totalAmount: number;
   status: OrderStatus;
+  paymentStatus: 'pending' | 'paid' | 'failed';
   shippingAddress: ShippingAddress;
   shippingMethod: ShippingMethod;
   shippingCost: number;
